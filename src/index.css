@@ -1,0 +1,105 @@
+:root {
+  --parent-color: #ec6c2a;
+  --project-title-color: #ec6b29;
+  --border-color: #cccccc;
+  --font-color-R: #757474; /* R - Radio */
+  --color: #37302d;
+  --font-color-header: #7e8484;
+  --color-breadcrumb: #8D8B8B;
+
+  --menu-bg: #f8f8f8;
+  --grey-light: #e0e0e0;
+  --white: #ffffff;
+  --btn-shadow: #e4e2e4;
+  --btn-link: #313c97;
+  --tag-shadow: #313c971a;
+  --font-family: 'Discover Sans';
+  --button-disable-bg: #ec6c2a;
+  --error-message-color: #409cff;
+  --warning-color: red;
+  --btn-height: 40px;
+
+  /* Input component  */
+  --input-label: #666;
+
+  /* Checkbox component */
+  --checkbox-label: #1c1b1f;
+
+  /* Breadcrumbs component */
+  --breadcrumb-text: #313c97;
+
+  /* Tabs component */
+  --tabs-text-active: #313c97;
+  --tabs-text: #23233f;
+
+  /* Page Title */
+  --page-title: #1c1b1f;
+
+  /* Table component */
+  --table-head: #23233f;
+  --table-body: #1c1b1f;
+
+  /* Button component*/
+  --btn-primary-bg: #ec7d16;
+  --btn-primary-text: #ffffff;
+
+  --btn-secondary-bg: #ffffff;
+  --btn-secondary-text: #ec7d16;
+  --btn-secondary-border: #ec7d16;
+
+  --btn-secondary2-bg: #ffffff;
+  --btn-secondary2-text: #8e8e8e;
+
+  --btn-tertiary-bg: transparent;
+  --btn-tertiary-text: #ec7d16;
+
+  --btn-disabled-bg: #e3e1e1;
+  --btn-disabled-text: #8d8b8b;
+
+  /* Toast variables (change here to affect all toasts) */
+  --toast-success-bg: #ffffff;
+  --toast-success-text: #1c7a37;
+  --toast-success-border: #16a34a;
+
+  --toast-error-bg: #ffffff;
+  --toast-error-text: #b91c1c;
+  --toast-error-border: #ef4444;
+
+  --toast-warning-bg: #ffffff;
+  --toast-warning-text: #92400e;
+  --toast-warning-border: #f59e0b;
+
+  --toast-default-bg: #ffffff;
+  --toast-default-text: #1c1b1f;
+  --toast-default-border: #e5e7eb;
+
+  --toast-outline: rgba(0, 0, 0, 0.06);
+}
+
+body {
+  --primary-color: var(--theme-primary-color);
+  --background-color: var(--theme-background-color);
+  --text-color: var(--theme-text-color);
+}
+
+.light-theme {
+  --theme-primary-color: #007bff;
+  --theme-background-color: #f8f9fa;
+  --theme-text-color: #212529;
+}
+
+.dark-theme {
+  --theme-background-color: #282828ca;
+  --theme-text-color: #f8f9fa;
+}
+
+textarea:focus-visible{
+  outline: none !important;
+}
+
+.ant-table-cell{
+  text-align: center !important;
+}
+.ant-layout {
+  background: var(--white);
+}

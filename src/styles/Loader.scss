@@ -1,0 +1,40 @@
+/*
+ * Copyright (c) 2024 Payhuddle. All rights reserved.
+ *
+ * This software and associated documentation files are the intellectual
+ * property of Payhuddle. Use of this software is governed by the terms
+ * of the applicable license agreement.
+ *
+ * No part of this software may be reproduced, distributed, or transmitted
+ * in any form or by any means without the prior written permission of Payhuddle.
+ */
+.ant-spin-dot-item {
+  background-color: var(--btn-primary-bg) !important;
+}
+
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+}
+
+.loader-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 9999;
+  
+  .ant-spin {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+  }
+}
