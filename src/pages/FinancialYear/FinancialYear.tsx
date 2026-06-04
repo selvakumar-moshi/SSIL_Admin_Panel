@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Typography, message } from 'antd';
 import TableComponent from '../../components/Table/TableWithPagination';
 import ActionIcons from '../../components/Table/ActionIcons';
@@ -117,8 +117,6 @@ const FinancialYear = () => {
   };
 
   const handleActionClick = async (action: string, record: FinancialYearRecord) => {
-    console.log(`${action} clicked for financial year:`, record);
-    
     setLoadingActions(prev => ({
       ...prev,
       [record.key]: {
@@ -147,7 +145,6 @@ const FinancialYear = () => {
           }
           break;
         default:
-          console.log(`Unknown action: ${action}`);
       }
     } catch (error) {
       message.error(`Failed to ${action} ${record.year}`);

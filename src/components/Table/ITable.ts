@@ -11,7 +11,7 @@
 export interface ITableColumn {
   key: string;
   title: string;
-  dataIndex: string;
+  dataIndex?: string;
   width?: number | string;
   align?: "left" | "center" | "right";
   render?: (value: any, record: any, index: number) => React.ReactNode;

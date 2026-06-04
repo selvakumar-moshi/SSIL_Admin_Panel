@@ -4,7 +4,6 @@ import Reports from '../../pages/Reports/Reports';
 import FinancialYear from '../../pages/FinancialYear/FinancialYear';
 import TabSectionCreation from '../../pages/TabSectionCreation/TabSectionCreation';
 import Login from '../../pages/Login/Login';
-import PrivateRoute from '../router/PrivateRoute';
 import LayoutContainter from '../layouts/LayoutContainter';
 
 const ProtectedLayout = () => {
@@ -49,7 +48,7 @@ const router = createBrowserRouter([
   },
 ],
 {
-  basename: "/ssil/",
+  basename: "/supersales/",
 }
 );
 

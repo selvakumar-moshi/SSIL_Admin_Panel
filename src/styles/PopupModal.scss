@@ -15,7 +15,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
-    height: 40px;
+    height: 32px;
     border-bottom: 1px solid #efefef;
     backdrop-filter: blur(8px); /* Adjust blur strength */
     background-color: rgba(255, 255, 255, 0.7);
@@ -79,6 +79,12 @@
     // min-height: 400px;
     // max-height: 431px;
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 transparent;
+      &::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
 
     &-content-text{
       font-family: var(--font-family);
@@ -228,7 +234,7 @@
   // Footer Styles
   &__footer {
     border-top: 1px solid #efefef;
-    padding: 8px 20px;
+    padding: 8px 20px 0 20px;
     background: white;
     display: flex;
     align-items: center;
@@ -357,5 +363,5 @@
 //   border-radius: 5px !important;
 // }
 .ant-modal .ant-modal-container{
-  padding: 0px !important;
+  padding: 8px 0px !important;
 }

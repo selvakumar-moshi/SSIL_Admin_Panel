@@ -1,29 +1,24 @@
-import { Layout, Avatar, Dropdown, Space, Badge, Button, theme } from 'antd';
-import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  BellOutlined,
-  UserOutlined,
-  SettingOutlined,
-  LogoutOutlined,
-  SunOutlined,
-  MoonOutlined,
-} from '@ant-design/icons';
-import { useState } from 'react';
+import { Menu,Dropdown,} from 'antd';
+import User_Icon from "../../assets/User_Icon.svg";
+import Logout_Icon from "../../assets/Logout_Icon.svg";
+import ssilLogo from "../../assets/ssil.png";
 import { useNavigate } from 'react-router-dom';
 
-
 const HeaderContainer = () => {
- 
+  const navigate = useNavigate();
+  
+  const handleLogout = () =>{
+    navigate('/login');
+  }
   return (
      <div className='header'>
         {/* Left Section - Logo and App Name */}
         <div className="header__left">
           <div className="header__logo">
-            <UserOutlined />
+            <img src={ssilLogo} alt='ssil-logo' />
           </div>
           <div className="header__app-name">
-            SSIL Admin Panel
+            SuperSales Admin Panel
           </div>
         </div>
 
@@ -43,7 +38,6 @@ const HeaderContainer = () => {
                 <div className="header__profile-content">
                   <div className="header__profile-header">
                       <span className="header__profile-title">Profile</span>
-                      <UserOutlined />
                   </div>
                     
                   <div className="header__profile-info">
@@ -67,10 +61,6 @@ const HeaderContainer = () => {
                         <span className="header__profile-value">selva@gmail.com</span>
                         <div className="header__border-line"></div>
                       </div>
-                      <div className="header__profile-row">
-                        <span className="header__profile-label">Roles</span>
-                        <span className="header__profile-value">{displayUserRole}</span>
-                      </div>
                   </div>
                 </div>
               </Menu>
@@ -83,14 +73,14 @@ const HeaderContainer = () => {
             getPopupContainer={() => document.body}
           >
             <div className="header__role">
-              <UserOutlined />
+              <img src={User_Icon} alt='user-icon' />
               <div className="header__role-text">Profile</div>
             </div>
           </Dropdown>
 
           {/* Logout */}
-          <div className="header__logout">
-            <UserOutlined />
+          <div className="header__logout" onClick={handleLogout}>
+            <img src={Logout_Icon} alt='user-icon' />
             <span className="header__logout-text">Logout</span>
           </div>
         </div>

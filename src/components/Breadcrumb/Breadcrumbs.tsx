@@ -9,10 +9,9 @@ interface BreadcrumbItem {
 
 interface BreadcrumbsProps {
   items: BreadcrumbItem[];
-  currentPath: string;
 }
 
-const Breadcrumbs = ({ items, currentPath }: BreadcrumbsProps) => {
+const Breadcrumbs = ({ items }: BreadcrumbsProps) => {
   return (
     <div
       style={{

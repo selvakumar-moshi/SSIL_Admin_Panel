@@ -1,5 +1,5 @@
 {
-  "name": "ssil_admin",
+  "name": "supersales_admin",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.2.5",
+    "@reduxjs/toolkit": "^2.12.0",
     "antd": "^6.4.3",
+    "axios": "^1.17.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-redux": "^9.3.0",

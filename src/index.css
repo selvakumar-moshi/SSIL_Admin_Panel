@@ -1,3 +1,43 @@
+@font-face {
+  font-family: 'Discover Sans';
+  src: url('../public/DiscoverSans-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+ 
+@font-face {
+  font-family: 'Discover Sans';
+  src: url('../public/DiscoverSans-Book.ttf') format('truetype');
+  font-weight: 400; 
+  font-style: normal;
+  font-display: swap;
+}
+ 
+@font-face {
+  font-family: 'Discover Sans';
+  src: url('../public/DiscoverSans-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+ 
+@font-face {
+  font-family: 'Discover Sans';
+  src: url('../public/DiscoverSans-Semibold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+ 
+@font-face {
+  font-family: 'Discover Sans';
+  src: url('../public/DiscoverSans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --parent-color: #ec6c2a;
   --project-title-color: #ec6b29;

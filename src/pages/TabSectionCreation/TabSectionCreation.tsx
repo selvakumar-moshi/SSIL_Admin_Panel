@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Typography, message } from 'antd';
 import TableComponent from '../../components/Table/TableWithPagination';
 import ActionIcons from '../../components/Table/ActionIcons';
@@ -39,33 +39,16 @@ const TabSectionCreation = () => {
       title: 'Tab Name',
       dataIndex: 'tabName',
       key: 'tabName',
-      sorter: (a: TabNameRecord, b: TabNameRecord) => a.tabName.localeCompare(b.tabName),
     },
     {
       title: 'Created At',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      sorter: (a: TabNameRecord, b: TabNameRecord) => 
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-      render: (date: string) => new Date(date).toLocaleDateString('en-IN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
     },
     {
       title: 'Last Updated',
       dataIndex: 'updatedAt',
       key: 'updatedAt',
-      render: (date: string) => date ? new Date(date).toLocaleDateString('en-IN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }) : '-',
     },
     {
       title: 'Actions',
@@ -104,42 +87,36 @@ const TabSectionCreation = () => {
         { 
           key: '1', 
           tabName: 'Dashboard', 
-          description: 'Main overview dashboard with key metrics',
           createdAt: '2024-01-15T10:30:00Z',
           updatedAt: '2024-02-20T14:15:00Z'
         },
         { 
           key: '2', 
           tabName: 'Reports', 
-          description: 'All system reports and analytics',
           createdAt: '2024-01-16T11:45:00Z',
           updatedAt: '2024-02-18T09:30:00Z'
         },
         { 
           key: '3', 
           tabName: 'Analytics', 
-          description: 'Data analytics and insights',
           createdAt: '2024-01-17T09:15:00Z',
           updatedAt: '2024-02-22T16:45:00Z'
         },
         { 
           key: '4', 
           tabName: 'Settings', 
-          description: 'System configuration settings',
           createdAt: '2024-01-18T14:20:00Z',
           updatedAt: '2024-02-25T11:00:00Z'
         },
         { 
           key: '5', 
           tabName: 'Users', 
-          description: 'User management and roles',
           createdAt: '2024-01-19T16:00:00Z',
           updatedAt: '2024-02-28T10:30:00Z'
         },
         { 
           key: '6', 
           tabName: 'Inventory', 
-          description: '',
           createdAt: '2024-02-01T10:00:00Z',
           updatedAt: '2024-02-01T10:00:00Z'
         },
@@ -171,8 +148,6 @@ const TabSectionCreation = () => {
   };
 
   const handleActionClick = async (action: string, record: TabNameRecord) => {
-    console.log(`${action} clicked for tab name:`, record);
-    
     setLoadingActions(prev => ({
       ...prev,
       [record.key]: {
@@ -205,7 +180,6 @@ const TabSectionCreation = () => {
           }
           break;
         default:
-          console.log(`Unknown action: ${action}`);
       }
     } catch (error) {
       message.error(`Failed to ${action} ${record.tabName}`);

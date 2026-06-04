@@ -3,13 +3,9 @@
  */
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  DashboardOutlined,
-  BarChartOutlined,
-  UserOutlined,
-  SettingOutlined,
-} from '@ant-design/icons';
 import imgFolderCopy from "../../assets/Folder.svg";
+import tabIcon from "../../assets/tab_Icon.svg";
+import yearIcon from "../../assets/yearIcon.svg";
 
 export interface MenuItem {
   id: string;
@@ -26,30 +22,29 @@ export interface SidebarProps {
   collapsed?: boolean;
 }
 
-// Static menu configuration - 4 main menus
 const MENU_ITEMS: MenuItem[] = [
   {
     id: "dashboard",
     label: "Dashboard",
-    icon: imgFolderCopy, // This is a string path
+    icon: imgFolderCopy, 
     route: "/dashboard",
   },
   {
     id: "reports",
     label: "Reports",
-    icon: <BarChartOutlined />, // This is a React element
+    icon: imgFolderCopy,
     route: "/reports",
   },
   {
     id: "financial",
     label: "Financial year",
-    icon: <UserOutlined />,
+    icon: yearIcon,
     route: "/financial",
   },
   {
     id: "tabSectionCreation",
     label: "Tab Section Creation",
-    icon: <SettingOutlined />,
+    icon: tabIcon,
     route: "/tabSectionCreation",
   },
 ];
@@ -82,10 +77,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   // Helper function to render icon
   const renderIcon = (icon: React.ReactNode | string) => {
     if (typeof icon === 'string') {
-      // It's an image path, render as img tag
       return <img src={icon} alt="icon" className="sidebar__icon" />;
     }
-    // It's a React component, render directly
     return icon;
   };
 

@@ -11,6 +11,7 @@ export interface ButtonProps {
   disabled?: boolean;
   className?: string;
   icon?: any;
+  style?: React.CSSProperties;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -23,6 +24,7 @@ const Button: React.FC<ButtonProps> = ({
   disabled = false,
   className = "",
   icon,
+  style,
 }) => {
   const getButtonStyles = () => {
     const baseStyles =
@@ -61,7 +63,7 @@ const Button: React.FC<ButtonProps> = ({
           borderRadius: "20px",
           padding: "8px 31px",
           color: "var(--btn-primary-text)",
-          // hover handled by CSS variable if you want to implement :hover in CSS
+          ...style,
         };
 
       case "secondary":
