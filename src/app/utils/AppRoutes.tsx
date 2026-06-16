@@ -47,9 +47,9 @@ const router = createBrowserRouter([
     ],
   },
 ],
-{
-  basename: "/supersales/",
-}
+// {
+//   basename: "/supersales/",
+// }
 );
 
 export default router;
