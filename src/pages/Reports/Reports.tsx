@@ -28,6 +28,9 @@ const Reports = () => {
     subSubFolderOptions,
     isSubFolderDisabled,
     isSubSubFolderDisabled,
+    tabNameOptions,
+    financialYearOptions,
+    isLoadingDropdownData,
     
     // Handlers
     handlePageChange,
@@ -44,6 +47,8 @@ const Reports = () => {
   const columns = getColumns(loadingActions, handleActionClick);
   
   const dropdownFields = getDropdownFields(
+    tabNameOptions,
+    financialYearOptions,
     false,
     isSubFolderDisabled,
     isSubSubFolderDisabled,
@@ -98,7 +103,8 @@ const Reports = () => {
         primaryButtonText="Create Report"
         secondaryButtonText="Cancel"
         primaryButtonLoading={submitting}
-        primaryButtonDisabled={submitting}
+        primaryButtonDisabled={submitting || isLoadingDropdownData}
+        secondaryButtonDisabled={submitting || isLoadingDropdownData}
         minHeight={550}
       >
         <div className='popup-modal__content-content-text2'>
@@ -107,6 +113,7 @@ const Reports = () => {
             fields={dropdownFields}
             values={formValues as Record<string, string | string[]>}
             onChange={handleDropdownChange}
+            // loading={isLoadingDropdownData}
           />
           
           {/* Input Field (Title only) */}
@@ -114,7 +121,7 @@ const Reports = () => {
             fields={inputFields}
             values={formValues as Record<string, string>}
             onChange={handleInputChange}
-            disabled={submitting}
+            disabled={submitting || isLoadingDropdownData}
           />
           
           {/* File Upload Section */}

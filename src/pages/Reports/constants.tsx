@@ -1,4 +1,3 @@
-// constants.tsx
 import ActionIcons from '../../components/Table/ActionIcons';
 
 export interface Report {
@@ -139,15 +138,6 @@ export const getFolderPath = (parentKey: string, subFolderKey?: string, subSubFo
   return path;
 };
 
-// Tab Name dropdown options
-export const tabNameOptions = [
-  { value: 'quarterly', label: 'Quarterly' },
-  { value: 'resultPublications', label: 'Result Publications' },
-  { value: 'annualReport', label: 'Annual Report' },
-  { value: 'annualReturns', label: 'Annual Returns' },
-  { value: 'secretarial', label: 'Secretarial' },
-];
-
 // Input fields configuration
 export const inputFields: InputField[] = [
   {
@@ -162,6 +152,8 @@ export const inputFields: InputField[] = [
 
 // Dropdown fields configuration (without folder fields as they're dynamic)
 export const getDropdownFields = (
+  tabNameOptions: Array<{ value: string; label: string }>,
+  financialYearOptions: Array<{ value: string; label: string }>,
   parentFolderDisabled: boolean = false,
   subFolderDisabled: boolean = true,
   subSubFolderDisabled: boolean = true,
@@ -214,11 +206,7 @@ export const getDropdownFields = (
       label: 'Financial Year',
       placeholder: 'Select Financial Year',
       required: true,
-      options: [
-        { value: '2023-2024', label: '2023-2024' },
-        { value: '2024-2025', label: '2024-2025' },
-        { value: '2025-2026', label: '2025-2026' },
-      ],
+      options: financialYearOptions,
       showSearch: true,
       inputTestId: 'financial-year-dropdown',
     },

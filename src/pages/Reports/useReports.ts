@@ -1,9 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { message } from 'antd';
+import type { RootState } from '../../services/Store';
+import { getTabNames, getFinancialYears } from '../../services/SuperSalesAction';
 import type { Report, FormValues } from './constants';
-import { getParentFolderOptions, getSubFolderOptions, getSubSubFolderOptions, getFolderPath} from './constants';
+import { getParentFolderOptions, getSubFolderOptions, getSubSubFolderOptions, getFolderPath } from './constants';
 
 export const useReports = () => {
+  const dispatch = useDispatch();
+  
   // Table states
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -28,6 +33,57 @@ export const useReports = () => {
   // Dropdown disabled states
   const [isSubFolderDisabled, setIsSubFolderDisabled] = useState(true);
   const [isSubSubFolderDisabled, setIsSubSubFolderDisabled] = useState(true);
+
+  // API data states
+  const [tabNameOptions, setTabNameOptions] = useState<Array<{ value: string; label: string }>>([]);
+  const [financialYearOptions, setFinancialYearOptions] = useState<Array<{ value: string; label: string }>>([]);
+  const [loadingTabNames, setLoadingTabNames] = useState(false);
+  const [loadingFinancialYears, setLoadingFinancialYears] = useState(false);
+
+  // Redux state
+  const { TabNamesData, FinancialYearsData } = useSelector(
+    (state: RootState) => state.superSales
+  );
+
+  // Fetch Tab Names
+  useEffect(() => {
+    if (isModalVisible) {
+      setLoadingTabNames(true);
+      dispatch(getTabNames() as any);
+    }
+  }, [isModalVisible, dispatch]);
+
+  // Fetch Financial Years
+  useEffect(() => {
+    if (isModalVisible) {
+      setLoadingFinancialYears(true);
+      dispatch(getFinancialYears() as any);
+    }
+  }, [isModalVisible, dispatch]);
+
+  // Process Tab Names data
+  useEffect(() => {
+    if (TabNamesData && Array.isArray(TabNamesData)) {
+      const options = TabNamesData.map((item: any) => ({
+        value: item.id,
+        label: item.tabNameValue
+      }));
+      setTabNameOptions(options);
+      setLoadingTabNames(false);
+    }
+  }, [TabNamesData]);
+
+  // Process Financial Years data
+  useEffect(() => {
+    if (FinancialYearsData && Array.isArray(FinancialYearsData)) {
+      const options = FinancialYearsData.map((item: any) => ({
+        value: item.id,
+        label: item.financialYearCode
+      }));
+      setFinancialYearOptions(options);
+      setLoadingFinancialYears(false);
+    }
+  }, [FinancialYearsData]);
 
   // Initialize parent folder options
   useEffect(() => {
@@ -196,6 +252,8 @@ export const useReports = () => {
     setSubSubFolderOptions([]);
     setIsSubFolderDisabled(true);
     setIsSubSubFolderDisabled(true);
+    setTabNameOptions([]);
+    setFinancialYearOptions([]);
     setIsModalVisible(true);
   };
 
@@ -212,6 +270,24 @@ export const useReports = () => {
 
   // Handle form submission
   const handleModalSubmit = async () => {
+    // Validate required fields
+    if (!formValues.tabName) {
+      message.error('Please select a Tab Name');
+      return;
+    }
+    if (!formValues.parentFolder) {
+      message.error('Please select a Parent Folder');
+      return;
+    }
+    if (!formValues.financialYear) {
+      message.error('Please select a Financial Year');
+      return;
+    }
+    if (fileList.length === 0) {
+      message.error('Please upload a file');
+      return;
+    }
+
     setSubmitting(true);
     
     try {
@@ -233,31 +309,30 @@ export const useReports = () => {
         formValues.subSubFolder as string
       );
       
+      // Find the selected tab name label
+      const selectedTab = tabNameOptions.find(opt => opt.value === formValues.tabName);
+      const selectedFinancialYear = financialYearOptions.find(opt => opt.value === formValues.financialYear);
+      
       console.log('Creating report with values:', {
-        tabName: formValues.tabName,
+        tabName: selectedTab?.label || formValues.tabName,
+        tabNameId: formValues.tabName,
         parentFolder: formValues.parentFolder,
         subFolder: formValues.subFolder,
         subSubFolder: formValues.subSubFolder,
         folderPath: folderPath,
         title: formValues.title,
-        financialYear: formValues.financialYear,
+        financialYear: selectedFinancialYear?.label || formValues.financialYear,
+        financialYearId: formValues.financialYear,
         fileName: fileList[0]?.name,
         fileSize: fileList[0]?.size,
       });
       
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Removed unused tabNameLabel variable
-      message.success(`Report "${formValues.title}" created successfully in ${folderPath}!`);
+      message.success(`Report "${formValues.title || 'Untitled'}" created successfully in ${folderPath}!`);
       
-      setIsModalVisible(false);
-      setFormValues({});
-      setFileList([]);
-      setSubFolderOptions([]);
-      setSubSubFolderOptions([]);
-      setIsSubFolderDisabled(true);
-      setIsSubSubFolderDisabled(true);
-      
+      handleModalClose();
       fetchReports(currentPage, pageSize);
       
     } catch (error) {
@@ -267,6 +342,9 @@ export const useReports = () => {
       setSubmitting(false);
     }
   };
+
+  // Check if dropdown data is loading
+  const isLoadingDropdownData = loadingTabNames || loadingFinancialYears;
 
   return {
     // States
@@ -285,6 +363,9 @@ export const useReports = () => {
     subSubFolderOptions,
     isSubFolderDisabled,
     isSubSubFolderDisabled,
+    tabNameOptions,
+    financialYearOptions,
+    isLoadingDropdownData,
     
     // Handlers
     handlePageChange,

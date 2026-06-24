@@ -1,21 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input, Card, message, Typography, Space } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import Button from "../../components/Button/Button";
+import { getSSLogin } from '../../services/SuperSalesAction';
+import { resetSSLogin } from '../../services/CSuperSales';
+import type { RootState } from '../../services/Store';
 
 const { Title } = Typography;
 
 const Login = () => {
-  const [loading, setLoading] = useState(false);
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Get login state from Redux
+  const { loading, SSLoginData, apiStatus } = useSelector(
+    (state: RootState) => state.superSales
+  );
+
+  // Handle login response
+  useEffect(() => {
+    if (apiStatus.SSLoginData.success && SSLoginData) {
+      message.success('Login successful!');
+      navigate('/reports');
+      dispatch(resetSSLogin());
+    }
+
+    if (apiStatus.SSLoginData.error) {
+      message.error(apiStatus.SSLoginData.error || 'Invalid email or password!');
+      dispatch(resetSSLogin());
+    }
+  }, [apiStatus.SSLoginData.success, apiStatus.SSLoginData.error, SSLoginData, navigate, dispatch]);
 
   const handleSubmit = () => {
     // Basic validation
-    if (!username.trim()) {
-      message.error('Please input your username!');
+    if (!email.trim()) {
+      message.error('Please input your email!');
       return;
     }
     if (!password.trim()) {
@@ -23,20 +46,8 @@ const Login = () => {
       return;
     }
 
-    setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      // Static credentials check
-      if (username === 'admin' && password === 'Admin@123') {
-        message.success('Login successful!');
-        localStorage.setItem('isAuthenticated', 'true');
-        navigate('/reports');
-      } else {
-        message.error('Invalid username or password!');
-      }
-      setLoading(false);
-    }, 500);
+    // Dispatch login action
+    dispatch(getSSLogin({ email, password }) as any);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -59,14 +70,14 @@ const Login = () => {
           <div onKeyPress={handleKeyPress}>
             <div className="form-field">
               <label className="form-label">
-                Username <span style={{ color: 'red' }}>*</span>
+                Email <span style={{ color: 'red' }}>*</span>
               </label>
               <Input 
                 prefix={<UserOutlined />} 
-                placeholder="Enter username" 
+                placeholder="Enter email" 
                 size="large"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
@@ -98,7 +109,7 @@ const Login = () => {
 
             <div style={{ textAlign: 'center', color: '#999', fontSize: '12px', marginTop: '16px' }}>
               <p>Demo Credentials:</p>
-              <p>Username: admin | Password: Admin@123</p>
+              <p>Email: selva@gmail.com | Password: Admin@123</p>
             </div>
           </div>
         </Space>

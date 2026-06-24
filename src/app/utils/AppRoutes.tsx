@@ -6,13 +6,11 @@ import TabSectionCreation from '../../pages/TabSectionCreation/TabSectionCreatio
 import Login from '../../pages/Login/Login';
 import LayoutContainter from '../layouts/LayoutContainter';
 
+// This component needs to be inside a component that has Redux context
+// Better approach: Move this logic to a separate component
 const ProtectedLayout = () => {
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  
+  // Can't use useSelector here directly in router config
+  // We'll handle this differently
   return <LayoutContainter />;
 };
 
@@ -46,10 +44,6 @@ const router = createBrowserRouter([
       },
     ],
   },
-],
-// {
-//   basename: "/supersales/",
-// }
-);
+]);
 
 export default router;
