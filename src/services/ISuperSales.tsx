@@ -1,7 +1,10 @@
 export interface IinitialState {
     SSLoginData: any;
+    RegisterData: any;
+    UsersData: any;
     FinancialYearsData: any;
     TabNamesData: any;
+    ReportsData: any;
     loading: boolean;
     error: string | null;
     isAuthenticated: boolean;
@@ -16,14 +19,20 @@ export interface IinitialState {
 
 export const initialState: IinitialState = {
     SSLoginData: [],
+    RegisterData: [],
+    UsersData: [],
     FinancialYearsData: [],
-    TabNamesData: [], 
+    TabNamesData: [],
+    ReportsData: [],
     loading: false,
     error: null,
     isAuthenticated: false,
     apiStatus: {
         SSLoginData: { loading: false, success: false, error: null },
+        RegisterData: { loading: false, success: false, error: null },
+        UsersData: { loading: false, success: false, error: null },
         FinancialYearsData: { loading: false, success: false, error: null },
         TabNamesData: { loading: false, success: false, error: null },
+        ReportsData: { loading: false, success: false, error: null },
     },
 }

@@ -1,6 +1,7 @@
 import axios from "axios";
 
-let apiURL = "https://dev-api.supersales.co.in/api";
+// let apiURL = "https://dev-api.supersales.co.in/api";
+let apiURL = "http://localhost:5297/api";
 
 const Super_Sales = axios.create({
   baseURL: apiURL,

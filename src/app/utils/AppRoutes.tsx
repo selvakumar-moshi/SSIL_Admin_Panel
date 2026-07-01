@@ -2,15 +2,12 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Dashboard from '../../pages/Dashboard';
 import Reports from '../../pages/Reports/Reports';
 import FinancialYear from '../../pages/FinancialYear/FinancialYear';
-import TabSectionCreation from '../../pages/TabSectionCreation/TabSectionCreation';
+import TabNameCreation from '../../pages/TabNameCreation/TabNameCreation';
 import Login from '../../pages/Login/Login';
 import LayoutContainter from '../layouts/LayoutContainter';
+import Users from '../../pages/Users/Users';
 
-// This component needs to be inside a component that has Redux context
-// Better approach: Move this logic to a separate component
 const ProtectedLayout = () => {
-  // Can't use useSelector here directly in router config
-  // We'll handle this differently
   return <LayoutContainter />;
 };
 
@@ -31,6 +28,10 @@ const router = createBrowserRouter([
         element: <Dashboard />,
       },
       {
+        path: "/users",
+        element: <Users />,
+      },
+      {
         path: "/reports",
         element: <Reports />,
       },
@@ -39,8 +40,8 @@ const router = createBrowserRouter([
         element: <FinancialYear />,
       },
       {
-        path: "/tabSectionCreation",
-        element: <TabSectionCreation />,
+        path: "/tabNameCreation",
+        element: <TabNameCreation />,
       },
     ],
   },

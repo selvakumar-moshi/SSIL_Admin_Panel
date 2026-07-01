@@ -20,7 +20,7 @@ export interface ToastMessagesProps {
 }
  
 /** Auto-dismiss after this many ms when duration is missing or invalid. */
-const DEFAULT_TOAST_DURATION_MS = 5000;
+export const DEFAULT_TOAST_DURATION_MS = 5000;
  
 const ToastMessages: React.FC<ToastMessagesProps> = ({
   messages,

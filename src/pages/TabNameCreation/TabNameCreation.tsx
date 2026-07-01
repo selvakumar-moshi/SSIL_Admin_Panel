@@ -6,12 +6,13 @@ import PopupModal from '../../components/PopupModal/PopupModal';
 import InputFields from '../../components/InputFields/InputFields';
 import Button from '../../components/Button/Button';
 import Loader from '../../components/Loader/Loader';
+import ToastMessages from '../../components/ToastMessages';
 import { useTabManagement } from './useTabHooks';
 import { TAB_INPUT_FIELDS, getTabTableColumns } from './Constants';
 
 const { Title } = Typography;
 
-const TabSectionCreation = () => {
+export default function TabNameCreation() {
     const {
         currentPage,
         pageSize,
@@ -33,6 +34,8 @@ const TabSectionCreation = () => {
         handleDeleteModalClose,
         handleModalSubmit,
         handleDeleteConfirm,
+        toastMessages,
+        hideToast,
     } = useTabManagement();
 
     // Prepare columns with action handlers
@@ -62,6 +65,7 @@ const TabSectionCreation = () => {
 
     return (
         <div className="tab-name-creation-container">
+            <ToastMessages messages={toastMessages} onMessageClose={hideToast} />
             <div className="report_main">
                 <Title level={3} style={{ margin: 0 }}>Tab Name</Title>
                 <Button variant="primary" className="page-title__button" onClick={handleCreateTabName}>
@@ -143,6 +147,4 @@ const TabSectionCreation = () => {
             </PopupModal>
         </div>
     );
-};
-
-export default TabSectionCreation;
+}

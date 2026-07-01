@@ -32,6 +32,41 @@
 
   &__field {
     margin-bottom: 6px;
+
+    &--locked {
+      .form-fields-section__input,
+      .ant-input-affix-wrapper.form-fields-section__input,
+      .ant-input-password.form-fields-section__input {
+        background-color: rgba(0, 0, 0, 0.04) !important;
+        border-color: #d9d9d9 !important;
+        cursor: not-allowed;
+        box-shadow: none !important;
+
+        &:hover,
+        &:focus,
+        &:focus-within {
+          border-color: #d9d9d9 !important;
+          box-shadow: none !important;
+        }
+
+        .ant-input {
+          color: rgba(0, 0, 0, 0.25) !important;
+          background-color: transparent !important;
+          cursor: not-allowed;
+        }
+
+        .ant-input-prefix,
+        .ant-input-prefix .anticon {
+          color: rgba(0, 0, 0, 0.25) !important;
+        }
+
+        .ant-input-password-icon,
+        .ant-input-password-icon .anticon {
+          color: rgba(0, 0, 0, 0.45) !important;
+          cursor: pointer;
+        }
+      }
+    }
   }
 
   &__required{
@@ -64,6 +99,37 @@
       &:hover {
         border-color: #D13F3F !important;
         box-shadow: 0 0 0 2px rgba(209, 63, 63, 0.2) !important;
+      }
+    }
+
+    &--readonly {
+      background-color: rgba(0, 0, 0, 0.04) !important;
+      border-color: #d9d9d9 !important;
+      cursor: not-allowed;
+      box-shadow: none !important;
+
+      &:focus,
+      &:hover,
+      &:focus-within {
+        border-color: #d9d9d9 !important;
+        box-shadow: none !important;
+      }
+
+      .ant-input {
+        color: rgba(0, 0, 0, 0.25) !important;
+        background-color: transparent !important;
+        cursor: not-allowed;
+      }
+
+      .ant-input-prefix,
+      .ant-input-prefix .anticon {
+        color: rgba(0, 0, 0, 0.25) !important;
+      }
+
+      .ant-input-password-icon,
+      .ant-input-password-icon .anticon {
+        color: rgba(0, 0, 0, 0.45) !important;
+        cursor: pointer;
       }
     }
   }
@@ -139,7 +205,7 @@
 }
 
 // Override Ant Design styles
-.ant-input-outlined:focus-within{
+.ant-input-outlined:focus-within:not(.form-fields-section__input--readonly) {
   border-color: #ec7d16;
   box-shadow: none;
 }

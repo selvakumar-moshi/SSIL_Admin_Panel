@@ -1,116 +1,137 @@
-import { useState, useEffect } from 'react';
-import { Input, Card, message, Typography, Space } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { Card, Typography, Space } from 'antd';
 import Button from "../../components/Button/Button";
-import { getSSLogin } from '../../services/SuperSalesAction';
-import { resetSSLogin } from '../../services/CSuperSales';
-import type { RootState } from '../../services/Store';
+import InputFields from '../../components/InputFields/InputFields';
+import ToastMessages from '../../components/ToastMessages';
+import { useLogin } from './useLoginHooks';
+import { LOGIN_INPUT_FIELDS, REGISTER_INPUT_FIELDS } from './Constants';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    firstName,
+    setFirstName,
+    lastName,
+    setLastName,
+    jobTitle,
+    setJobTitle,
+    registerEmail,
+    setRegisterEmail,
+    registerPassword,
+    setRegisterPassword,
+    isRegisterMode,
+    loading,
+    handleLogin,
+    handleRegister,
+    handleKeyPress,
+    toggleMode,
+    toastMessages,
+    hideToast,
+  } = useLogin();
 
-  // Get login state from Redux
-  const { loading, SSLoginData, apiStatus } = useSelector(
-    (state: RootState) => state.superSales
-  );
-
-  // Handle login response
-  useEffect(() => {
-    if (apiStatus.SSLoginData.success && SSLoginData) {
-      message.success('Login successful!');
-      navigate('/reports');
-      dispatch(resetSSLogin());
-    }
-
-    if (apiStatus.SSLoginData.error) {
-      message.error(apiStatus.SSLoginData.error || 'Invalid email or password!');
-      dispatch(resetSSLogin());
-    }
-  }, [apiStatus.SSLoginData.success, apiStatus.SSLoginData.error, SSLoginData, navigate, dispatch]);
-
-  const handleSubmit = () => {
-    // Basic validation
-    if (!email.trim()) {
-      message.error('Please input your email!');
-      return;
-    }
-    if (!password.trim()) {
-      message.error('Please input your password!');
+  const handleInputChange = (name: string, value: string) => {
+    if (name === 'registerPassword') {
       return;
     }
 
-    // Dispatch login action
-    dispatch(getSSLogin({ email, password }) as any);
+    const setters: Record<string, (val: string) => void> = {
+      email: setEmail,
+      password: setPassword,
+      firstName: setFirstName,
+      lastName: setLastName,
+      jobTitle: setJobTitle,
+      registerEmail: setRegisterEmail,
+      registerPassword: setRegisterPassword,
+    };
+    setters[name]?.(value);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSubmit();
-    }
-  };
+  const loginValues = { email, password };
+  const registerValues = { firstName, lastName, jobTitle, registerEmail, registerPassword };
 
   return (
     <div className="login-container">
+      <ToastMessages messages={toastMessages} onMessageClose={hideToast} />
       <Card className="login-card">
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
           <Title level={2} style={{ textAlign: 'center', margin: 0 }}>
-            Welcome Back
+            {isRegisterMode ? 'Create Account' : 'Welcome Back'}
           </Title>
           <Title level={5} style={{ textAlign: 'center', color: '#666', marginTop: 0 }}>
-            Please login to your account
+            {isRegisterMode 
+              ? 'Register to get started' 
+              : 'Please login to your account'}
           </Title>
           
           <div onKeyPress={handleKeyPress}>
-            <div className="form-field">
-              <label className="form-label">
-                Email <span style={{ color: 'red' }}>*</span>
-              </label>
-              <Input 
-                prefix={<UserOutlined />} 
-                placeholder="Enter email" 
-                size="large"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+            {isRegisterMode ? (
+              <>
+                <InputFields
+                  fields={REGISTER_INPUT_FIELDS}
+                  values={registerValues}
+                  onChange={handleInputChange}
+                  disabled={loading}
+                />
 
-            <div className="form-field">
-              <label className="form-label">
-                Password <span style={{ color: 'red' }}>*</span>
-              </label>
-              <Input.Password
-                prefix={<LockOutlined />}
-                placeholder="Enter password"
-                size="large"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onPressEnter={handleSubmit}
-              />
-            </div>
+                <div className="form-field">
+                  <Button 
+                    variant="primary" 
+                    className="page-title__button"
+                    onClick={handleRegister}
+                    loading={loading}
+                    style={{ width: '100%' }}
+                  >
+                    Register
+                  </Button>
+                </div>
 
-            <div className="form-field">
-              <Button 
-                variant="primary" 
-                className="page-title__button"
-                onClick={handleSubmit}
-                loading={loading}
-                style={{ width: '100%' }}
-              >
-                Log in
-              </Button>
-            </div>
+                <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                  <Text type="secondary">
+                    Already have an account?{' '}
+                    <span  style={{ color: '#1890ff', cursor: 'pointer' }} onClick={toggleMode}>
+                      Login here
+                    </span>
+                  </Text>
+                </div>
+              </>
+            ) : (
+              <>
+                <InputFields
+                  fields={LOGIN_INPUT_FIELDS}
+                  values={loginValues}
+                  onChange={handleInputChange}
+                  disabled={loading}
+                />
 
-            <div style={{ textAlign: 'center', color: '#999', fontSize: '12px', marginTop: '16px' }}>
-              <p>Demo Credentials:</p>
-              <p>Email: selva@gmail.com | Password: Admin@123</p>
-            </div>
+                <div className="form-field">
+                  <Button 
+                    variant="primary" 
+                    className="page-title__button"
+                    onClick={handleLogin}
+                    loading={loading}
+                    style={{ width: '100%' }}
+                  >
+                    Log in
+                  </Button>
+                </div>
+
+                <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                  <Text type="secondary">
+                    Don't have an account?{' '}
+                    <span 
+                      style={{ color: '#1890ff', cursor: 'pointer' }}
+                      onClick={toggleMode}
+                    >
+                      Register here
+                    </span>
+                  </Text>
+                </div>
+              </>
+            )}
           </div>
         </Space>
       </Card>

@@ -1,384 +1,386 @@
-import { useState, useEffect, useCallback } from 'react';
+// useReports.ts
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { message } from 'antd';
+import { useToastMessages } from '../../components/ToastMessages/useToastMessages';
 import type { RootState } from '../../services/Store';
-import { getTabNames, getFinancialYears } from '../../services/SuperSalesAction';
-import type { Report, FormValues } from './constants';
-import { getParentFolderOptions, getSubFolderOptions, getSubSubFolderOptions, getFolderPath } from './constants';
+import { 
+    getTabNames, 
+    getFinancialYears,
+    getReports,
+    createReportWithFile,
+    updateReport,
+    deleteReport
+} from '../../services/SuperSalesAction';
+import type { Report, FormValues, ReportsGroupedData } from './constants';
+import { parseReportsGroupedData, getGroupedReportSections } from './constants';
 
 export const useReports = () => {
-  const dispatch = useDispatch();
-  
-  // Table states
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<Report[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loadingActions, setLoadingActions] = useState<Record<string, Record<string, boolean>>>({});
-  
-  // Modal states
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [fileList, setFileList] = useState<any[]>([]);
-  
-  // Form states
-  const [formValues, setFormValues] = useState<FormValues>({});
-  
-  // Folder dropdown options states
-  const [parentFolderOptions, setParentFolderOptions] = useState<Array<{ value: string; label: string }>>([]);
-  const [subFolderOptions, setSubFolderOptions] = useState<Array<{ value: string; label: string }>>([]);
-  const [subSubFolderOptions, setSubSubFolderOptions] = useState<Array<{ value: string; label: string }>>([]);
-  
-  // Dropdown disabled states
-  const [isSubFolderDisabled, setIsSubFolderDisabled] = useState(true);
-  const [isSubSubFolderDisabled, setIsSubSubFolderDisabled] = useState(true);
+    const dispatch = useDispatch();
+    const { messages: toastMessages, showSuccess, showError, showWarning, hideToast } = useToastMessages();
+    
+    // Table states
+    const [loadingActions, setLoadingActions] = useState<Record<string, Record<string, boolean>>>({});
+    const [selectedTabName, setSelectedTabName] = useState<string>('');
+    
+    // Modal states
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [selectedRecord, setSelectedRecord] = useState<Report | null>(null);
+    const [submitting, setSubmitting] = useState(false);
+    const [fileList, setFileList] = useState<any[]>([]);
+    const [existingFile, setExistingFile] = useState<string | null>(null);
+    
+    // Form states
+    const [formValues, setFormValues] = useState<FormValues>({});
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // API data states
-  const [tabNameOptions, setTabNameOptions] = useState<Array<{ value: string; label: string }>>([]);
-  const [financialYearOptions, setFinancialYearOptions] = useState<Array<{ value: string; label: string }>>([]);
-  const [loadingTabNames, setLoadingTabNames] = useState(false);
-  const [loadingFinancialYears, setLoadingFinancialYears] = useState(false);
+    // API data states
+    const [filterTabNameOptions, setFilterTabNameOptions] = useState<Array<{ value: string; label: string }>>([]);
+    const [tabNameOptions, setTabNameOptions] = useState<Array<{ value: string; label: string }>>([]);
+    const [financialYearOptions, setFinancialYearOptions] = useState<Array<{ value: string; label: string }>>([]);
+    const [loadingFilterTabNames, setLoadingFilterTabNames] = useState(false);
+    const [loadingTabNames, setLoadingTabNames] = useState(false);
+    const [loadingFinancialYears, setLoadingFinancialYears] = useState(false);
+    
+    // Track delete operation
+    const [isDeleting, setIsDeleting] = useState(false);
 
-  // Redux state
-  const { TabNamesData, FinancialYearsData } = useSelector(
-    (state: RootState) => state.superSales
-  );
+    // Redux state
+    const { 
+        TabNamesData, 
+        FinancialYearsData, 
+        ReportsData,
+        loading,
+        apiStatus 
+    } = useSelector((state: RootState) => state.superSales);
 
-  // Fetch Tab Names
-  useEffect(() => {
-    if (isModalVisible) {
-      setLoadingTabNames(true);
-      dispatch(getTabNames() as any);
-    }
-  }, [isModalVisible, dispatch]);
+    // Parse nested reports data: { tabName: { financialYear: Report[] } }
+    const reportsGroupedData: ReportsGroupedData = parseReportsGroupedData(ReportsData);
+    const groupedReports = selectedTabName
+        ? getGroupedReportSections(reportsGroupedData, selectedTabName)
+        : [];
 
-  // Fetch Financial Years
-  useEffect(() => {
-    if (isModalVisible) {
-      setLoadingFinancialYears(true);
-      dispatch(getFinancialYears() as any);
-    }
-  }, [isModalVisible, dispatch]);
+    // Fetch Reports and Tab Names on component mount
+    useEffect(() => {
+        dispatch(getReports() as any);
+        setLoadingFilterTabNames(true);
+        dispatch(getTabNames() as any);
+    }, [dispatch]);
 
-  // Process Tab Names data
-  useEffect(() => {
-    if (TabNamesData && Array.isArray(TabNamesData)) {
-      const options = TabNamesData.map((item: any) => ({
-        value: item.id,
-        label: item.tabNameValue
-      }));
-      setTabNameOptions(options);
-      setLoadingTabNames(false);
-    }
-  }, [TabNamesData]);
-
-  // Process Financial Years data
-  useEffect(() => {
-    if (FinancialYearsData && Array.isArray(FinancialYearsData)) {
-      const options = FinancialYearsData.map((item: any) => ({
-        value: item.id,
-        label: item.financialYearCode
-      }));
-      setFinancialYearOptions(options);
-      setLoadingFinancialYears(false);
-    }
-  }, [FinancialYearsData]);
-
-  // Initialize parent folder options
-  useEffect(() => {
-    setParentFolderOptions(getParentFolderOptions());
-  }, []);
-
-  // Mock data fetch function - replace with actual API call
-  const fetchReports = useCallback(async (page: number, size: number) => {
-    setLoading(true);
-    try {
-      const mockData: Report[] = [
-        { key: '1', name: 'Sales Report Q4', pdfurl: 'www.google.com', date: '2024-01-15', status: 'Generated' },
-        { key: '2', name: 'User Analytics', pdfurl: 'www.google.com', date: '2024-01-14', status: 'Pending' },
-        { key: '3', name: 'Revenue Report', pdfurl: 'www.google.com', date: '2024-01-13', status: 'Generated' },
-        { key: '4', name: 'Customer Feedback', pdfurl: 'www.google.com', date: '2024-01-12', status: 'Generated' },
-        { key: '5', name: 'Product Analytics', pdfurl: 'www.google.com', date: '2024-01-11', status: 'Pending' },
-        { key: '6', name: 'Marketing Report', pdfurl: 'www.google.com', date: '2024-01-10', status: 'Generated' },
-        { key: '7', name: 'Inventory Report', pdfurl: 'www.google.com', date: '2024-01-09', status: 'Generated' },
-        { key: '8', name: 'Financial Summary', pdfurl: 'www.google.com', date: '2024-01-08', status: 'Pending' },
-        { key: '9', name: 'Sales Report Q3', pdfurl: 'www.google.com', date: '2024-01-07', status: 'Generated' },
-        { key: '10', name: 'Annual Report', pdfurl: 'www.google.com', date: '2024-01-06', status: 'Generated' },
-        { key: '11', name: 'Quarterly Review', pdfurl: 'www.google.com', date: '2024-01-05', status: 'Pending' },
-        { key: '12', name: 'Performance Metrics', pdfurl: 'www.google.com', date: '2024-01-04', status: 'Generated' },
-      ];
-      
-      // Add folder path to mock data
-      const mockDataWithPath = mockData.map(item => ({
-        ...item,
-        folderPath: 'Disclosure Under Regulation 46 > Financial > Quarterly'
-      }));
-      
-      const start = (page - 1) * size;
-      const paginatedMock = mockDataWithPath.slice(start, start + size);
-      
-      setData(paginatedMock);
-      setTotal(mockDataWithPath.length);
-    } catch (error) {
-      message.error('Failed to fetch reports');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchReports(currentPage, pageSize);
-  }, [currentPage, pageSize, fetchReports]);
-
-  const handlePageChange = (page: number, newPageSize: number) => {
-    setCurrentPage(page);
-    if (newPageSize !== pageSize) {
-      setPageSize(newPageSize);
-      setCurrentPage(1);
-    }
-  };
-
-  const handleActionClick = async (action: string, record: Report) => {
-    setLoadingActions(prev => ({
-      ...prev,
-      [record.key]: {
-        ...prev[record.key],
-        [action]: true
-      }
-    }));
-
-    try {
-      switch (action.toLowerCase()) {
-        case 'view':
-          message.info(`Viewing ${record.name}`);
-          break;
-        case 'edit':
-          message.info(`Editing ${record.name}`);
-          break;
-        case 'delete':
-          message.warning(`Deleting ${record.name}`);
-          break;
-        default:
-      }
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-    } catch (error) {
-      message.error(`Failed to ${action} ${record.name}`);
-    } finally {
-      setLoadingActions(prev => ({
-        ...prev,
-        [record.key]: {
-          ...prev[record.key],
-          [action]: false
+    // Fetch Tab Names and Financial Years when modal opens
+    useEffect(() => {
+        if (isModalVisible) {
+            setLoadingTabNames(true);
+            setLoadingFinancialYears(true);
+            dispatch(getTabNames() as any);
+            dispatch(getFinancialYears() as any);
         }
-      }));
-    }
-  };
+    }, [isModalVisible, dispatch]);
 
-  // Handle parent folder change
-  const handleParentFolderChange = (value: string) => {
-    setFormValues(prev => ({ 
-      ...prev, 
-      parentFolder: value,
-      subFolder: undefined,
-      subSubFolder: undefined
-    }));
-    
-    // Update sub folder options
-    const subOptions = getSubFolderOptions(value);
-    setSubFolderOptions(subOptions);
-    setIsSubFolderDisabled(subOptions.length === 0);
-    
-    // Reset sub-sub folder
-    setSubSubFolderOptions([]);
-    setIsSubSubFolderDisabled(true);
-  };
+    // Process Tab Names data for filter dropdown and modal
+    useEffect(() => {
+        if (TabNamesData && Array.isArray(TabNamesData)) {
+            const options = TabNamesData.map((item: any) => ({
+                value: item.tabNameValue,
+                label: item.tabNameValue,
+            }));
+            setFilterTabNameOptions(options);
+            setTabNameOptions(options);
+            setLoadingFilterTabNames(false);
+            setLoadingTabNames(false);
 
-  // Handle sub folder change
-  const handleSubFolderChange = (value: string) => {
-    setFormValues(prev => ({ 
-      ...prev, 
-      subFolder: value,
-      subSubFolder: undefined
-    }));
-    
-    // Update sub-sub folder options
-    const parentKey = formValues.parentFolder as string;
-    const subSubOptions = getSubSubFolderOptions(parentKey, value);
-    setSubSubFolderOptions(subSubOptions);
-    setIsSubSubFolderDisabled(subSubOptions.length === 0);
-  };
+            setSelectedTabName(prev => prev || (options[4]?.value ?? ''));
+        }
+    }, [TabNamesData]);
 
-  // Handle sub-sub folder change
-  const handleSubSubFolderChange = (value: string) => {
-    setFormValues(prev => ({ ...prev, subSubFolder: value }));
-  };
+    // Process Financial Years data
+    useEffect(() => {
+        if (FinancialYearsData && Array.isArray(FinancialYearsData)) {
+            const options = FinancialYearsData.map((item: any) => ({
+                value: item.financialYearCode,
+                label: item.financialYearCode
+            }));
+            setFinancialYearOptions(options);
+            setLoadingFinancialYears(false);
+        }
+    }, [FinancialYearsData]);
 
-  // Handle input field changes
-  const handleInputChange = (name: string, value: string) => {
-    setFormValues(prev => ({ ...prev, [name]: value }));
-  };
+    // Handle API status for CRUD operations
+    useEffect(() => {
+        if (apiStatus.ReportsData?.success && submitting && !isDeleting) {
+            showSuccess(isEditMode ? 'Report updated successfully!' : 'Report created successfully!');
+            setIsModalVisible(false);
+            setFormValues({});
+            setFileList([]);
+            setSelectedRecord(null);
+            setIsEditMode(false);
+            setFormErrors({});
+            setExistingFile(null);
+            setSubmitting(false);
+            dispatch(getReports() as any);
+        }
 
-  // Handle dropdown field changes (for tabName, financialYear)
-  const handleDropdownChange = (name: string, value: string | string[]) => {
-    if (name === 'parentFolder') {
-      handleParentFolderChange(value as string);
-    } else if (name === 'subFolder') {
-      handleSubFolderChange(value as string);
-    } else if (name === 'subSubFolder') {
-      handleSubSubFolderChange(value as string);
-    } else {
-      setFormValues(prev => ({ ...prev, [name]: value }));
-    }
-  };
+        if (apiStatus.ReportsData?.success && isDeleting) {
+            showSuccess(`Report "${selectedRecord?.title}" deleted successfully!`);
+            setIsDeleteModalVisible(false);
+            setSelectedRecord(null);
+            setIsDeleting(false);
+            setSubmitting(false);
+            dispatch(getReports() as any);
+        }
 
-  // Handle file upload change
-  const handleFileChange = (newFileList: any[]) => {
-    setFileList(newFileList);
-  };
+        if (apiStatus.ReportsData?.error) {
+            showError(apiStatus.ReportsData.error);
+            setSubmitting(false);
+            setIsDeleting(false);
+        }
+    }, [apiStatus.ReportsData, dispatch, isDeleting, isEditMode, selectedRecord?.title, showError, showSuccess, submitting]);
 
-  // Handle file deletion
-  const handleDeleteFile = (fileName: string) => {
-    console.log(`File deleted: ${fileName}`);
-  };
+    const handleFilterTabChange = (tabName: string | undefined) => {
+        setSelectedTabName(tabName || '');
+    };
 
-  // Show modal
-  const handleGenerateReport = () => {
-    setFormValues({});
-    setFileList([]);
-    setSubFolderOptions([]);
-    setSubSubFolderOptions([]);
-    setIsSubFolderDisabled(true);
-    setIsSubSubFolderDisabled(true);
-    setTabNameOptions([]);
-    setFinancialYearOptions([]);
-    setIsModalVisible(true);
-  };
+    const handleActionClick = (action: string, record: Report) => {
+        setLoadingActions(prev => ({
+            ...prev,
+            [record.id]: {
+                ...prev[record.id],
+                [action]: true
+            }
+        }));
 
-  // Handle modal close
-  const handleModalClose = () => {
-    setIsModalVisible(false);
-    setFormValues({});
-    setFileList([]);
-    setSubFolderOptions([]);
-    setSubSubFolderOptions([]);
-    setIsSubFolderDisabled(true);
-    setIsSubSubFolderDisabled(true);
-  };
+        try {
+            switch (action.toLowerCase()) {
+                case 'view':
+                    if (record.s3Url) {
+                        window.open(record.s3Url, '_blank');
+                    } else {
+                        showWarning('No URL available for this report');
+                    }
+                    break;
+                case 'edit':
+                    setSelectedRecord(record);
+                    setIsEditMode(true);
+                    setFormValues({
+                        tabName: record.tabNameValue || '',
+                        financialYear: record.financialYearCode || '',
+                        title: record.title || '',
+                    });
+                    setExistingFile(record.s3Url || null);
+                    setFileList([]);
+                    setFormErrors({});
+                    setIsModalVisible(true);
+                    break;
+                case 'delete':
+                    setSelectedRecord(record);
+                    setIsDeleteModalVisible(true);
+                    break;
+                default:
+                    break;
+            }
+        } catch (error) {
+            showError(`Failed to ${action} report`);
+        } finally {
+            setLoadingActions(prev => ({
+                ...prev,
+                [record.id]: {
+                    ...prev[record.id],
+                    [action]: false
+                }
+            }));
+        }
+    };
 
-  // Handle form submission
-  const handleModalSubmit = async () => {
-    // Validate required fields
-    if (!formValues.tabName) {
-      message.error('Please select a Tab Name');
-      return;
-    }
-    if (!formValues.parentFolder) {
-      message.error('Please select a Parent Folder');
-      return;
-    }
-    if (!formValues.financialYear) {
-      message.error('Please select a Financial Year');
-      return;
-    }
-    if (fileList.length === 0) {
-      message.error('Please upload a file');
-      return;
-    }
+    const handleDeleteConfirm = () => {
+        if (!selectedRecord) return;
 
-    setSubmitting(true);
-    
-    try {
-      const formData = new FormData();
-      formData.append('tabName', formValues.tabName as string);
-      formData.append('parentFolder', formValues.parentFolder as string);
-      formData.append('subFolder', (formValues.subFolder as string) || '');
-      formData.append('subSubFolder', (formValues.subSubFolder as string) || '');
-      formData.append('title', formValues.title as string);
-      formData.append('financialYear', formValues.financialYear as string);
-      
-      if (fileList.length > 0 && fileList[0].originFileObj) {
-        formData.append('file', fileList[0].originFileObj);
-      }
-      
-      const folderPath = getFolderPath(
-        formValues.parentFolder as string,
-        formValues.subFolder as string,
-        formValues.subSubFolder as string
-      );
-      
-      // Find the selected tab name label
-      const selectedTab = tabNameOptions.find(opt => opt.value === formValues.tabName);
-      const selectedFinancialYear = financialYearOptions.find(opt => opt.value === formValues.financialYear);
-      
-      console.log('Creating report with values:', {
-        tabName: selectedTab?.label || formValues.tabName,
-        tabNameId: formValues.tabName,
-        parentFolder: formValues.parentFolder,
-        subFolder: formValues.subFolder,
-        subSubFolder: formValues.subSubFolder,
-        folderPath: folderPath,
-        title: formValues.title,
-        financialYear: selectedFinancialYear?.label || formValues.financialYear,
-        financialYearId: formValues.financialYear,
-        fileName: fileList[0]?.name,
-        fileSize: fileList[0]?.size,
-      });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      message.success(`Report "${formValues.title || 'Untitled'}" created successfully in ${folderPath}!`);
-      
-      handleModalClose();
-      fetchReports(currentPage, pageSize);
-      
-    } catch (error) {
-      console.error('Failed to create report:', error);
-      message.error('Failed to create report. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+        setIsDeleting(true);
+        setSubmitting(true);
+        dispatch(deleteReport({ id: selectedRecord.id }) as any);
+    };
 
-  // Check if dropdown data is loading
-  const isLoadingDropdownData = loadingTabNames || loadingFinancialYears;
+    const handleDeleteModalClose = () => {
+        setIsDeleteModalVisible(false);
+        setSelectedRecord(null);
+        setIsDeleting(false);
+        setSubmitting(false);
+    };
 
-  return {
-    // States
-    currentPage,
-    pageSize,
-    loading,
-    data,
-    total,
-    loadingActions,
-    isModalVisible,
-    submitting,
-    fileList,
-    formValues,
-    parentFolderOptions,
-    subFolderOptions,
-    subSubFolderOptions,
-    isSubFolderDisabled,
-    isSubSubFolderDisabled,
-    tabNameOptions,
-    financialYearOptions,
-    isLoadingDropdownData,
-    
-    // Handlers
-    handlePageChange,
-    handleActionClick,
-    handleInputChange,
-    handleDropdownChange,
-    handleFileChange,
-    handleDeleteFile,
-    handleGenerateReport,
-    handleModalClose,
-    handleModalSubmit,
-    
-    // Functions
-    fetchReports,
-  };
+    const validateForm = (): boolean => {
+        const newErrors: Record<string, string> = {};
+
+        if (!formValues.tabName || formValues.tabName.trim() === '') {
+            newErrors.tabName = 'Tab Name is required';
+        }
+
+        if (!formValues.financialYear || formValues.financialYear.trim() === '') {
+            newErrors.financialYear = 'Financial Year is required';
+        }
+
+        if (!isEditMode && fileList.length === 0) {
+            newErrors.fileUpload = 'Please upload a file';
+        }
+
+        setFormErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleInputChange = (name: string, value: string) => {
+        setFormValues(prev => ({ ...prev, [name]: value }));
+        if (formErrors[name]) {
+            setFormErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
+        }
+    };
+
+    const handleDropdownChange = (name: string, value: string | string[]) => {
+        setFormValues(prev => ({ ...prev, [name]: value }));
+        if (formErrors[name]) {
+            setFormErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
+        }
+    };
+
+    const handleFileChange = (newFileList: any[]) => {
+        setFileList(newFileList);
+        if (formErrors.fileUpload) {
+            setFormErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors.fileUpload;
+                return newErrors;
+            });
+        }
+    };
+
+    const handleDeleteFile = (fileName: string) => {
+        setFileList(prev => prev.filter(file => file.name !== fileName));
+    };
+
+    const handleDeleteExistingFile = () => {
+        setExistingFile(null);
+        setFileList([]);
+    };
+
+    const handleGenerateReport = () => {
+        setFormValues({});
+        setFileList([]);
+        setSelectedRecord(null);
+        setIsEditMode(false);
+        setFormErrors({});
+        setExistingFile(null);
+        setIsModalVisible(true);
+
+        if (tabNameOptions.length === 0) {
+            setLoadingTabNames(true);
+            setLoadingFinancialYears(true);
+            dispatch(getTabNames() as any);
+            dispatch(getFinancialYears() as any);
+        }
+    };
+
+    const handleModalClose = () => {
+        setIsModalVisible(false);
+        setFormValues({});
+        setFileList([]);
+        setSelectedRecord(null);
+        setIsEditMode(false);
+        setFormErrors({});
+        setExistingFile(null);
+        setSubmitting(false);
+    };
+
+    const handleModalSubmit = async () => {
+        if (!validateForm()) {
+            showError('Please fix the errors in the form');
+            return;
+        }
+
+        setSubmitting(true);
+
+        try {
+            const formData = new FormData();
+            
+            formData.append('financialYearCode', formValues.financialYear as string);
+            formData.append('tabNameValue', formValues.tabName as string);
+            formData.append('title', formValues.title as string || '');
+
+            if (isEditMode && selectedRecord) {
+                if (fileList.length > 0 && fileList[0].originFileObj) {
+                    formData.append('mainDocument', fileList[0].originFileObj);
+                } else if (existingFile) {
+                    formData.append('mainDocument', selectedRecord.mainDocument || '');
+                } else {
+                    formData.append('mainDocument', '');
+                }
+                
+                dispatch(updateReport({ 
+                    id: selectedRecord.id, 
+                    formData 
+                }) as any);
+            } else {
+                if (fileList.length > 0 && fileList[0].originFileObj) {
+                    formData.append('file', fileList[0].originFileObj);
+                } else {
+                    showError('Please upload a file');
+                    setSubmitting(false);
+                    return;
+                }
+                dispatch(createReportWithFile(formData) as any);
+            }
+        } catch (error) {
+            showError('Failed to submit report. Please try again.');
+            setSubmitting(false);
+        }
+    };
+
+    const isLoadingDropdownData = loadingTabNames || loadingFinancialYears;
+
+    return {
+        // States
+        loading,
+        loadingActions,
+        isModalVisible,
+        isDeleteModalVisible,
+        isEditMode,
+        selectedRecord,
+        submitting,
+        fileList,
+        formValues,
+        formErrors,
+        tabNameOptions,
+        financialYearOptions,
+        filterTabNameOptions,
+        selectedTabName,
+        groupedReports,
+        loadingFilterTabNames,
+        isLoadingDropdownData,
+        existingFile,
+        isDeleting,
+        
+        // Handlers
+        handleFilterTabChange,
+        handleActionClick,
+        handleInputChange,
+        handleDropdownChange,
+        handleFileChange,
+        handleDeleteFile,
+        handleDeleteExistingFile,
+        handleGenerateReport,
+        handleModalClose,
+        handleDeleteModalClose,
+        handleDeleteConfirm,
+        handleModalSubmit,
+        validateForm,
+        
+        // Toast
+        toastMessages,
+        hideToast,
+    };
 };

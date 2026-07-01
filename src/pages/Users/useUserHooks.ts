@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useToastMessages } from '../../components/ToastMessages/useToastMessages';
 import type { RootState } from '../../services/Store';
-import { getFinancialYears, createFinancialYear, updateFinancialYear, deleteFinancialYear } from '../../services/SuperSalesAction';
-import type { FinancialYearRecord } from './Constants';
+import { getUsers, updateUser, deleteUser } from '../../services/SuperSalesAction';
+import type { UserRecord } from './Constants';
 
-export const useFinancialYearManagement = () => {
+export const useUserManagement = () => {
     const dispatch = useDispatch();
     const { messages: toastMessages, showSuccess, showError, hideToast } = useToastMessages();
     const [currentPage, setCurrentPage] = useState(1);
@@ -15,63 +15,55 @@ export const useFinancialYearManagement = () => {
     // Modal states
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-    const [selectedRecord, setSelectedRecord] = useState<FinancialYearRecord | null>(null);
-    const [isEditMode, setIsEditMode] = useState(false);
+    const [selectedRecord, setSelectedRecord] = useState<UserRecord | null>(null);
     
     // Form values
     const [formValues, setFormValues] = useState<Record<string, string>>({});
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
     // Track which operation is in progress
-    const [operationType, setOperationType] = useState<'create' | 'update' | 'delete' | null>(null);
+    const [operationType, setOperationType] = useState<'update' | 'delete' | null>(null);
     const [needsRefresh, setNeedsRefresh] = useState(false);
 
     // Redux state
-    const { FinancialYearsData, loading, apiStatus } = useSelector(
+    const { UsersData, loading, apiStatus } = useSelector(
         (state: RootState) => state.superSales
     );
 
-    // Ensure FinancialYearsData is always an array
-    const financialYearsArray = Array.isArray(FinancialYearsData) ? FinancialYearsData : [];
+    // Ensure UsersData is always an array
+    const usersArray = Array.isArray(UsersData) ? UsersData : [];
 
-    // Fetch financial years on component mount
+    // Fetch users on component mount
     useEffect(() => {
-        dispatch(getFinancialYears() as any);
+        dispatch(getUsers() as any);
     }, [dispatch]);
 
     // Handle API status changes
     useEffect(() => {
-        if (apiStatus.FinancialYearsData?.success && operationType === 'create') {
-            showSuccess('Financial year created successfully!');
+        if (apiStatus.UsersData?.success && operationType === 'update') {
+            showSuccess('User updated successfully!');
             handleModalClose();
             setOperationType(null);
             setNeedsRefresh(true);
         }
 
-        if (apiStatus.FinancialYearsData?.success && operationType === 'update') {
-            showSuccess('Financial year updated successfully!');
-            handleModalClose();
-            setOperationType(null);
-            setNeedsRefresh(true);
-        }
-
-        if (apiStatus.FinancialYearsData?.success && operationType === 'delete') {
-            showSuccess('Financial year deleted successfully!');
+        if (apiStatus.UsersData?.success && operationType === 'delete') {
+            showSuccess('User deleted successfully!');
             handleDeleteModalClose();
             setOperationType(null);
             setNeedsRefresh(true);
         }
 
-        if (apiStatus.FinancialYearsData?.error) {
-            showError(apiStatus.FinancialYearsData.error);
+        if (apiStatus.UsersData?.error) {
+            showError(apiStatus.UsersData.error);
             setOperationType(null);
         }
-    }, [apiStatus.FinancialYearsData, operationType, showSuccess, showError]);
+    }, [apiStatus.UsersData, operationType, showSuccess, showError]);
 
     // Refresh data when needed
     useEffect(() => {
         if (needsRefresh) {
-            dispatch(getFinancialYears() as any);
+            dispatch(getUsers() as any);
             setNeedsRefresh(false);
         }
     }, [needsRefresh, dispatch]);
@@ -80,7 +72,7 @@ export const useFinancialYearManagement = () => {
     const getPaginatedData = () => {
         const start = (currentPage - 1) * pageSize;
         const end = start + pageSize;
-        return financialYearsArray.slice(start, end);
+        return usersArray.slice(start, end);
     };
 
     const handlePageChange = (page: number, newPageSize: number) => {
@@ -91,7 +83,7 @@ export const useFinancialYearManagement = () => {
         }
     };
 
-    const handleActionClick = (action: string, record: FinancialYearRecord) => {
+    const handleActionClick = (action: string, record: UserRecord) => {
         setLoadingActions(prev => ({
             ...prev,
             [record.id]: {
@@ -104,8 +96,13 @@ export const useFinancialYearManagement = () => {
             switch (action.toLowerCase()) {
                 case 'edit':
                     setSelectedRecord(record);
-                    setIsEditMode(true);
-                    setFormValues({ financialYearCode: record.financialYearCode });
+                    setFormValues({
+                        firstName: record.firstName || '',
+                        lastName: record.lastName || '',
+                        jobTitle: record.jobTitle || '',
+                        email: record.email || '',
+                        password: '', // Don't populate password for security
+                    });
                     setFormErrors({});
                     setIsModalVisible(true);
                     break;
@@ -117,7 +114,7 @@ export const useFinancialYearManagement = () => {
                     break;
             }
         } catch (error) {
-            showError(`Failed to ${action} financial year`);
+            showError(`Failed to ${action} user`);
         } finally {
             setLoadingActions(prev => ({
                 ...prev,
@@ -127,6 +124,37 @@ export const useFinancialYearManagement = () => {
                 }
             }));
         }
+    };
+
+    // Validate form
+    const validateForm = (): boolean => {
+        const newErrors: Record<string, string> = {};
+        
+        if (!formValues.firstName || formValues.firstName.trim() === '') {
+            newErrors.firstName = 'First name is required';
+        }
+        
+        if (!formValues.lastName || formValues.lastName.trim() === '') {
+            newErrors.lastName = 'Last name is required';
+        }
+        
+        if (!formValues.jobTitle || formValues.jobTitle.trim() === '') {
+            newErrors.jobTitle = 'Job title is required';
+        }
+        
+        if (!formValues.email || formValues.email.trim() === '') {
+            newErrors.email = 'Email is required';
+        } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formValues.email)) {
+            newErrors.email = 'Invalid email address';
+        }
+        
+        // Password is optional for edit, but if provided must be at least 6 characters
+        if (formValues.password && formValues.password.length > 0 && formValues.password.length < 6) {
+            newErrors.password = 'Password must be at least 6 characters';
+        }
+        
+        setFormErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleInputChange = (name: string, value: string) => {
@@ -140,21 +168,12 @@ export const useFinancialYearManagement = () => {
         }
     };
 
-    const handleCreateFinancialYear = () => {
-        setSelectedRecord(null);
-        setIsEditMode(false);
-        setFormValues({});
-        setFormErrors({});
-        setIsModalVisible(true);
-    };
-
-    // Close create/edit modal
+    // Close edit modal
     const handleModalClose = () => {
         setIsModalVisible(false);
         setFormValues({});
         setFormErrors({});
         setSelectedRecord(null);
-        setIsEditMode(false);
     };
 
     // Close delete modal
@@ -164,24 +183,34 @@ export const useFinancialYearManagement = () => {
     };
 
     const handleModalSubmit = () => {
-        if (isEditMode && selectedRecord) {
+        if (!validateForm()) {
+            showError('Please fix the errors in the form');
+            return;
+        }
+        
+        if (selectedRecord) {
             setOperationType('update');
-            dispatch(updateFinancialYear({
+            const updateData: any = {
                 id: selectedRecord.id,
-                financialYearCode: formValues.financialYearCode
-            }) as any);
-        } else {
-            setOperationType('create');
-            dispatch(createFinancialYear({
-                financialYearCode: formValues.financialYearCode
-            }) as any);
+                firstName: formValues.firstName,
+                lastName: formValues.lastName,
+                jobTitle: formValues.jobTitle,
+                email: formValues.email,
+            };
+            
+            // Only include password if it's provided
+            if (formValues.password && formValues.password.trim() !== '') {
+                updateData.password = formValues.password;
+            }
+            
+            dispatch(updateUser(updateData) as any);
         }
     };
 
     const handleDeleteConfirm = () => {
         if (!selectedRecord) return;
         setOperationType('delete');
-        dispatch(deleteFinancialYear({ id: selectedRecord.id }) as any);
+        dispatch(deleteUser({ id: selectedRecord.id }) as any);
     };
 
     return {
@@ -192,10 +221,9 @@ export const useFinancialYearManagement = () => {
         isModalVisible,
         isDeleteModalVisible,
         selectedRecord,
-        isEditMode,
         formValues,
         formErrors,
-        financialYearsArray,
+        usersArray,
         loading,
         getPaginatedData,
         
@@ -203,11 +231,11 @@ export const useFinancialYearManagement = () => {
         handlePageChange,
         handleActionClick,
         handleInputChange,
-        handleCreateFinancialYear,
         handleModalClose,
         handleDeleteModalClose,
         handleModalSubmit,
         handleDeleteConfirm,
+        validateForm,
 
         // Toast
         toastMessages,

@@ -14,6 +14,7 @@ export interface InputField {
   onBlur?: () => void;
   disabled?: boolean;
   status?: "error" | "success" | "warning" | "info" | "default";
+  visibilityToggle?: boolean;
 }
 
 export interface InputFieldsProps {
@@ -40,8 +41,33 @@ const InputFields: React.FC<InputFieldsProps> = ({
           {fields.map((field) => {
             const hasError =
             Boolean(errors[field.name]) || field.status === "error";
+            const isPasswordField = field.type === 'password';
+            const isFieldLocked = Boolean(field.disabled);
+            const isGloballyDisabled = disabled;
+            const inputClassName = !field.search ? "form-fields-section__input" : "form-fields-section__input2";
+            const combinedClassName = [
+              inputClassName,
+              hasError ? 'form-fields-section__input--error' : '',
+              isFieldLocked ? 'form-fields-section__input--readonly' : '',
+            ].filter(Boolean).join(' ');
+
+            const commonInputProps = {
+              placeholder: field.placeholder,
+              status: hasError ? "error" as const : undefined,
+              className: combinedClassName,
+              prefix: field.prefix,
+              value: values[field.name] || '',
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange?.(field.name, e.target.value),
+              disabled: isGloballyDisabled,
+              readOnly: isFieldLocked && !isGloballyDisabled,
+              'data-testid': `input-${field.name}`,
+            };
+
             return (
-              <div key={field.name} className="form-fields-section__field">
+              <div
+                key={field.name}
+                className={`form-fields-section__field ${isFieldLocked ? ' form-fields-section__field--locked' : ''}`}
+              >
                   <div className="ant-row ant-form-item">
                     <div className="ant-form-item-label">
                       <label className={field.required ? "ant-form-item-required" : ""}>
@@ -50,19 +76,17 @@ const InputFields: React.FC<InputFieldsProps> = ({
                       </label>
                     </div>
                     <div className="ant-form-item-control">
-                      <Input
-                        placeholder={field.placeholder}
-                        type={field.type || 'text'}
-                        status={hasError ? "error" : undefined}
-                        className={
-                          !field.search ? "form-fields-section__input" : "form-fields-section__input2"
-                        }
-                        prefix={field.prefix}
-                        value={values[field.name] || ''}
-                        onChange={(e) => onChange?.(field.name, e.target.value)}
-                        disabled={disabled || field.disabled}
-                        data-testid={`input-${field.name}`}
-                      />
+                      {isPasswordField ? (
+                        <Input.Password
+                          {...commonInputProps}
+                          visibilityToggle={field.visibilityToggle !== false}
+                        />
+                      ) : (
+                        <Input
+                          {...commonInputProps}
+                          type={field.type || 'text'}
+                        />
+                      )}
                       {errors[field.name] && (
                         <div className="form-fields-section__error-message">
                           {errors[field.name]}

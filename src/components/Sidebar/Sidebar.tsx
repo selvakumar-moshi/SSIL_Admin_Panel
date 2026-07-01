@@ -1,11 +1,10 @@
-/*
- * Copyright (c) 2024 Payhuddle. All rights reserved.
- */
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import imgFolderCopy from "../../assets/Folder.svg";
 import tabIcon from "../../assets/tab_Icon.svg";
 import yearIcon from "../../assets/yearIcon.svg";
+import GroupsIcon from "../../assets/Groups.svg";
+import report_Icon from "../../assets/report_Icon.svg";
 
 export interface MenuItem {
   id: string;
@@ -30,9 +29,15 @@ const MENU_ITEMS: MenuItem[] = [
     route: "/dashboard",
   },
   {
+    id: "users",
+    label: "Users",
+    icon: GroupsIcon,
+    route: "/users",
+  },
+  {
     id: "reports",
     label: "Reports",
-    icon: imgFolderCopy,
+    icon: report_Icon,
     route: "/reports",
   },
   {
@@ -42,10 +47,10 @@ const MENU_ITEMS: MenuItem[] = [
     route: "/financial",
   },
   {
-    id: "tabSectionCreation",
+    id: "tabNameCreation",
     label: "Tab Section Creation",
     icon: tabIcon,
-    route: "/tabSectionCreation",
+    route: "/tabNameCreation",
   },
 ];
 

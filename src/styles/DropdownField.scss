@@ -4,6 +4,14 @@
     padding: 0;
   }
 
+  &--inline {
+    min-width: 240px;
+
+    .dropdown-field__field {
+      margin-bottom: 0;
+    }
+  }
+
   &__field {
     margin-bottom: 12px;
   }

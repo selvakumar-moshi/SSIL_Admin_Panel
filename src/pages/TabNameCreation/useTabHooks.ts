@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { message } from 'antd';
+import { useToastMessages } from '../../components/ToastMessages/useToastMessages';
 import type { RootState } from '../../services/Store';
 import { getTabNames, createTabName, updateTabName, deleteTabName } from '../../services/SuperSalesAction';
 import type { TabNameRecord } from './Constants';
 
 export const useTabManagement = () => {
     const dispatch = useDispatch();
+    const { messages: toastMessages, showSuccess, showError, hideToast } = useToastMessages();
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [loadingActions, setLoadingActions] = useState<Record<string, Record<string, boolean>>>({});
@@ -48,17 +49,17 @@ export const useTabManagement = () => {
 
         if (status.success) {
             if (operationType === 'create') {
-                message.success('Tab name created successfully!');
+                showSuccess('Tab name created successfully!');
                 handleModalClose();
                 setOperationType(null);
                 setNeedsRefresh(true);
             } else if (operationType === 'update') {
-                message.success('Tab name updated successfully!');
+                showSuccess('Tab name updated successfully!');
                 handleModalClose();
                 setOperationType(null);
                 setNeedsRefresh(true);
             } else if (operationType === 'delete') {
-                message.success('Tab name deleted successfully!');
+                showSuccess('Tab name deleted successfully!');
                 handleDeleteModalClose();
                 setOperationType(null);
                 setNeedsRefresh(true);
@@ -66,10 +67,10 @@ export const useTabManagement = () => {
         }
 
         if (status.error) {
-            message.error(status.error);
+            showError(status.error);
             setOperationType(null);
         }
-    }, [apiStatus.TabNamesData, operationType]);
+    }, [apiStatus.TabNamesData, operationType, showSuccess, showError]);
 
     // Refresh data when needed
     useEffect(() => {
@@ -120,8 +121,7 @@ export const useTabManagement = () => {
                     break;
             }
         } catch (error) {
-            message.error(`Failed to ${action} tab name`);
-            console.error(`Error ${action} tab name:`, error);
+            showError(`Failed to ${action} tab name`);
         } finally {
             setLoadingActions(prev => ({
                 ...prev,
@@ -195,7 +195,7 @@ export const useTabManagement = () => {
 
     const handleModalSubmit = () => {
         if (!validateForm()) {
-            message.error('Please fix the errors in the form');
+            showError('Please fix the errors in the form');
             return;
         }
         
@@ -244,5 +244,9 @@ export const useTabManagement = () => {
         handleModalSubmit,
         handleDeleteConfirm,
         validateForm,
+
+        // Toast
+        toastMessages,
+        hideToast,
     };
 };

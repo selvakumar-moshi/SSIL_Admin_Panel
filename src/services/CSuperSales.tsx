@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { createFinancialYear, updateFinancialYear, deleteFinancialYear, getFinancialYears, getSSLogin, getTabNames, createTabName, updateTabName, deleteTabName } from "./SuperSalesAction";
+import { createFinancialYear, updateFinancialYear, deleteFinancialYear, getFinancialYears, getSSLogin, getTabNames, createTabName, updateTabName, deleteTabName, getRegister, deleteUser, updateUser, getUsers, getReports, createReportWithFile, updateReport, deleteReport} from "./SuperSalesAction";
 import { initialState } from "./ISuperSales";
 
 const SuperSalesSlice = createSlice({
@@ -8,10 +8,13 @@ const SuperSalesSlice = createSlice({
     reducers: {
         resetSSLogin: (state) => {
             state.SSLoginData = null;
+            state.RegisterData = null;
+            state.UsersData = null;
             state.loading = false;
             state.error = null;
             state.isAuthenticated = false;
             state.apiStatus.SSLoginData = { loading: false, success: false, error: null };
+            state.apiStatus.RegisterData = { loading: false, success: false, error: null };
         },
         clearError: (state) => {
             state.error = null;
@@ -47,6 +50,97 @@ const SuperSalesSlice = createSlice({
                 state.apiStatus.SSLoginData.success = false;
                 state.apiStatus.SSLoginData.error = action.payload as string || "Failed to fetch SS Login data";
             });
+            
+        builder
+            .addCase(getRegister.pending, (state) => {
+                state.loading = true;
+                state.apiStatus.RegisterData.loading = true;
+                state.apiStatus.RegisterData.success = false;
+                state.apiStatus.RegisterData.error = null;
+                state.error = null;
+            })
+            .addCase(getRegister.fulfilled, (state, action) => {
+                state.loading = false;
+                state.RegisterData = action.payload;
+                state.apiStatus.RegisterData.loading = false;
+                state.apiStatus.RegisterData.success = true;
+                state.apiStatus.RegisterData.error = null;
+            })
+            .addCase(getRegister.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string || "Failed to fetch Register data";
+                state.apiStatus.RegisterData.loading = false;
+                state.apiStatus.RegisterData.success = false;
+                state.apiStatus.RegisterData.error = action.payload as string || "Failed to fetch Register data";
+            });
+
+        builder
+            .addCase(getUsers.pending, (state) => {
+                state.loading = true;
+                state.apiStatus.UsersData.loading = true;
+                state.apiStatus.UsersData.success = false;
+                state.apiStatus.UsersData.error = null;
+                state.error = null;
+            })
+            .addCase(getUsers.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string || "Failed to fetch Users data";
+                state.apiStatus.UsersData.loading = false;
+                state.apiStatus.UsersData.success = false;
+                state.apiStatus.UsersData.error = action.payload as string || "Failed to fetch Users data";
+            })
+            .addCase(getUsers.fulfilled, (state, action) => {
+                state.loading = false;
+                state.UsersData = action.payload;
+                state.apiStatus.UsersData.loading = false;
+                state.apiStatus.UsersData.success = true;
+                state.apiStatus.UsersData.error = null;
+            })
+        builder
+            .addCase(updateUser.pending, (state) => {
+                state.loading = true;
+                state.apiStatus.UsersData.loading = true;
+                state.apiStatus.UsersData.success = false;
+                state.apiStatus.UsersData.error = null;
+                state.error = null;
+            })
+            .addCase(updateUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.UsersData = action.payload;
+                state.apiStatus.UsersData.loading = false;
+                state.apiStatus.UsersData.success = true;
+                state.apiStatus.UsersData.error = null;
+            })
+            .addCase(updateUser.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string || "Failed to update User";
+                state.apiStatus.UsersData.loading = false;
+                state.apiStatus.UsersData.success = false;
+                state.apiStatus.UsersData.error = action.payload as string || "Failed to update User";
+            });
+        builder
+            .addCase(deleteUser.pending, (state) => {
+                state.loading = true;
+                state.apiStatus.UsersData.loading = true;
+                state.apiStatus.UsersData.success = false;
+                state.apiStatus.UsersData.error = null;
+                state.error = null;
+            })
+            .addCase(deleteUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.UsersData = action.payload;
+                state.apiStatus.UsersData.loading = false;
+                state.apiStatus.UsersData.success = true;
+                state.apiStatus.UsersData.error = null;
+            })
+            .addCase(deleteUser.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string || "Failed to delete User";
+                state.apiStatus.UsersData.loading = false;
+                state.apiStatus.UsersData.success = false;
+                state.apiStatus.UsersData.error = action.payload as string || "Failed to delete User";
+            });
+            
         builder
             .addCase(getFinancialYears.pending, (state) => {
                 state.loading = true;
@@ -231,6 +325,99 @@ const SuperSalesSlice = createSlice({
                 state.apiStatus.TabNamesData.success = false;
                 state.apiStatus.TabNamesData.error = action.payload as string || "Failed to delete Tab Name";
             });
+
+            builder
+            .addCase(getReports.pending, (state) => {
+                state.loading = true;
+                state.apiStatus.ReportsData.loading = true;
+                state.apiStatus.ReportsData.success = false;
+                state.apiStatus.ReportsData.error = null;
+                state.error = null;
+            })
+            .addCase(getReports.fulfilled, (state, action) => {
+                state.loading = false;
+                state.ReportsData = action.payload;
+                state.apiStatus.ReportsData.loading = false;
+                state.apiStatus.ReportsData.success = true;
+                state.apiStatus.ReportsData.error = null;
+            })
+            .addCase(getReports.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string || "Failed to fetch Reports data";
+                state.apiStatus.ReportsData.loading = false;
+                state.apiStatus.ReportsData.success = false;
+                state.apiStatus.ReportsData.error = action.payload as string || "Failed to fetch Reports data";
+            });
+
+        builder
+            .addCase(createReportWithFile.pending, (state) => {
+                state.loading = true;
+                state.apiStatus.ReportsData.loading = true;
+                state.apiStatus.ReportsData.success = false;
+                state.apiStatus.ReportsData.error = null;
+                state.error = null;
+            })
+            .addCase(createReportWithFile.fulfilled, (state, action) => {
+                state.loading = false;
+                state.ReportsData = action.payload;
+                state.apiStatus.ReportsData.loading = false;
+                state.apiStatus.ReportsData.success = true;
+                state.apiStatus.ReportsData.error = null;
+            })
+            .addCase(createReportWithFile.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string || "Failed to create Report";
+                state.apiStatus.ReportsData.loading = false;
+                state.apiStatus.ReportsData.success = false;
+                state.apiStatus.ReportsData.error = action.payload as string || "Failed to create Report";
+            });
+
+        builder
+            .addCase(updateReport.pending, (state) => {
+                state.loading = true;
+                state.apiStatus.ReportsData.loading = true;
+                state.apiStatus.ReportsData.success = false;
+                state.apiStatus.ReportsData.error = null;
+                state.error = null;
+            })
+            .addCase(updateReport.fulfilled, (state, action) => {
+                state.loading = false;
+                state.ReportsData = action.payload;
+                state.apiStatus.ReportsData.loading = false;
+                state.apiStatus.ReportsData.success = true;
+                state.apiStatus.ReportsData.error = null;
+            })
+            .addCase(updateReport.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string || "Failed to update Report";
+                state.apiStatus.ReportsData.loading = false;
+                state.apiStatus.ReportsData.success = false;
+                state.apiStatus.ReportsData.error = action.payload as string || "Failed to update Report";
+            });
+
+            builder
+                .addCase(deleteReport.pending, (state) => {
+                    state.loading = true;
+                    state.apiStatus.ReportsData.loading = true;
+                    state.apiStatus.ReportsData.success = false;
+                    state.apiStatus.ReportsData.error = null;
+                    state.error = null;
+                })
+                .addCase(deleteReport.fulfilled, (state, action) => {
+                    state.loading = false;
+                    // Make sure the ReportsData is updated with the new data
+                    state.ReportsData = action.payload;
+                    state.apiStatus.ReportsData.loading = false;
+                    state.apiStatus.ReportsData.success = true;
+                    state.apiStatus.ReportsData.error = null;
+                })
+                .addCase(deleteReport.rejected, (state, action) => {
+                    state.loading = false;
+                    state.error = action.payload as string || "Failed to delete Report";
+                    state.apiStatus.ReportsData.loading = false;
+                    state.apiStatus.ReportsData.success = false;
+                    state.apiStatus.ReportsData.error = action.payload as string || "Failed to delete Report";
+                });
     },
 });
 

@@ -3,6 +3,72 @@
   display:flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.reports-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.reports-grouped-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+  overflow-y: auto;
+  max-height: calc(100vh - 180px);
+  padding-right: 4px;
+}
+
+.reports-year-section {
+  background: #fff;
+  border: 1px solid #e6e9f5;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.reports-year-section__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #e6e9f5;
+  padding: 10px 20px;
+  border-bottom: 1px solid #d6dbe8;
+}
+
+.reports-year-section__label {
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--table-head, #1c1b1f);
+}
+
+.reports-year-section__value {
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 700;
+  color: #ec6b29;
+}
+
+.reports-year-section .custom-table.reports-year-table {
+  position: static;
+  top: auto;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  overflow: visible;
+  border-radius: 0;
+}
+
+.reports-year-section .custom-table.reports-year-table .ant-table-thead {
+  position: static !important;
+}
+
+.reports-year-section .custom-table.reports-year-table .ant-table-thead .ant-table-cell {
+  border-radius: 0 !important;
 }
 
 .reports-header {

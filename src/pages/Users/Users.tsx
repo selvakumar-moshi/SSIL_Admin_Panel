@@ -4,15 +4,14 @@ import TableComponent from '../../components/Table/TableWithPagination';
 import ActionIcons from '../../components/Table/ActionIcons';
 import PopupModal from '../../components/PopupModal/PopupModal';
 import InputFields from '../../components/InputFields/InputFields';
-import Button from '../../components/Button/Button';
 import Loader from '../../components/Loader/Loader';
 import ToastMessages from '../../components/ToastMessages';
-import { useFinancialYearManagement } from './useFinancialHooks';
-import { FINANCIAL_INPUT_FIELDS, getFinancialTableColumns } from './Constants';
+import { useUserManagement } from './useUserHooks';
+import { USER_INPUT_FIELDS, getUserTableColumns } from './Constants';
 
 const { Title } = Typography;
 
-const FinancialYear = () => {
+const Users = () => {
     const {
         currentPage,
         pageSize,
@@ -20,27 +19,25 @@ const FinancialYear = () => {
         isModalVisible,
         isDeleteModalVisible,
         selectedRecord,
-        isEditMode,
         formValues,
         formErrors,
-        financialYearsArray,
+        usersArray,
         loading,
         getPaginatedData,
         handlePageChange,
         handleActionClick,
         handleInputChange,
-        handleCreateFinancialYear,
         handleModalClose,
         handleDeleteModalClose,
         handleModalSubmit,
         handleDeleteConfirm,
         toastMessages,
         hideToast,
-    } = useFinancialYearManagement();
+    } = useUserManagement();
 
     // Prepare columns with action handlers
     const columns = useMemo(() => {
-        const baseColumns = getFinancialTableColumns();
+        const baseColumns = getUserTableColumns();
         return [
             ...baseColumns,
             {
@@ -59,18 +56,16 @@ const FinancialYear = () => {
         ];
     }, [loadingActions, handleActionClick]);
 
-    if (loading && financialYearsArray.length === 0) {
+    if (loading && usersArray.length === 0) {
         return <Loader size="large" />;
     }
 
     return (
-        <div className="financial-year-container">
+        <div className="users-container">
             <ToastMessages messages={toastMessages} onMessageClose={hideToast} />
             <div className="report_main">
-                <Title level={3} style={{ margin: 0 }}>Financial Years</Title>
-                <Button variant="primary" className="page-title__button" onClick={handleCreateFinancialYear}>
-                    Create Financial Year
-                </Button>
+                <Title level={3} style={{ margin: 0 }}>Users</Title>
+                {/* Removed Create User button */}
             </div>
 
             <TableComponent
@@ -80,7 +75,7 @@ const FinancialYear = () => {
                 bordered={false}
                 currentPage={currentPage}
                 pageSize={pageSize}
-                total={financialYearsArray.length}
+                total={usersArray.length}
                 onPageChange={handlePageChange}
                 showSizeChanger={false}
                 showQuickJumper={false}
@@ -88,29 +83,29 @@ const FinancialYear = () => {
                 size="middle"
                 showHeader={true}
                 locale={{
-                    emptyText: 'No financial years available'
+                    emptyText: 'No users available'
                 }}
             />
 
-            {/* Create/Edit Modal */}
+            {/* Edit Modal */}
             <PopupModal
                 open={isModalVisible}
                 onClose={handleModalClose}
                 onSubmit={handleModalSubmit}
-                title={isEditMode ? "Edit Financial Year" : "Create New Financial Year"}
+                title="Edit User"
                 subtitle=""
-                primaryButtonText={isEditMode ? "Update" : "Create"}
+                primaryButtonText="Update"
                 secondaryButtonText="Cancel"
                 showFooter={true}
                 primaryButtonLoading={loading}
                 secondaryButtonDisabled={loading}
                 primaryButtonDisabled={loading}
                 contentHeight="auto"
-                minHeight={150}
+                minHeight={200}
             >
                 <div style={{ padding: '0 8px' }}>
                     <InputFields
-                        fields={FINANCIAL_INPUT_FIELDS}
+                        fields={USER_INPUT_FIELDS}
                         values={formValues}
                         errors={formErrors}
                         onChange={handleInputChange}
@@ -136,11 +131,11 @@ const FinancialYear = () => {
                 minHeight={100}
             >
                 <div className="popup-modal__content-content-text">
-                    Are you sure you want to delete the Financial Year <b>"{selectedRecord?.financialYearCode}"</b>?
+                    Are you sure you want to delete the user <b>"{selectedRecord?.firstName} {selectedRecord?.lastName}"</b>?
                 </div>
             </PopupModal>
         </div>
     );
 };
 
-export default FinancialYear;
+export default Users;
